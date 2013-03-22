@@ -1,4 +1,5 @@
-haircrack
-=========
+haircrack v0.1
+===============
 
-automated aircrack/reaver/pyrit
+An automated aircrack/reaver/pyrit interface
+
