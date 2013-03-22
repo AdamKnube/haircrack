@@ -7,6 +7,8 @@
 #
 sudo apt-get update
 sudo apt-get install \
+python-dev \
+subversion \
 build-essential \
 devscripts \
 automake \
@@ -41,4 +43,3 @@ cd pyrit/pyrit
 python setup.py build
 sudo python setup.py install
 cd ../..
-
