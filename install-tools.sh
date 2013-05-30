@@ -23,7 +23,7 @@ libpcap-dev \
 libssl-dev
 
 # Now we acquire/build aircrack-ng
-svn co http://trac.aircrack-ng.org/svn/trunk/ aircrack
+svn co http://svn.aircrack-ng.org/trunk/ aircrack
 cd aircrack
 make unstable=true sqlite=true
 sudo make unstable=true sqlite=true install
