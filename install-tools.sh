@@ -20,7 +20,8 @@ python-scapy \
 libsqlite0-dev \
 libsqlite3-dev \
 libpcap-dev \
-libssl-dev
+libssl-dev \ 
+libnl-dev
 
 # Now we acquire/build aircrack-ng
 svn co http://svn.aircrack-ng.org/trunk/ aircrack
