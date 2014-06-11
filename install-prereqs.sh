@@ -50,10 +50,18 @@ elsif ($dist =~ /ARCH/) {
   $packages[8] = 'scapy';
   $packages[9] = 'python2-distutils-extra';
   $packages[10] = 'sqlite';
-  $packages[11] = 'libpcap';
+  $packages[11] = 'python-distutils-extra';
   $packages[12] = 'openssl';
   $packages[13] = 'libnl';
-  $packages[14] = 'python-distutils-extra';
+  $packages[14] = 'wget';  
+
+  if (`pacman -Ss libpcap` =~ /installed/) { 
+    print "Downgrading libpcap...\n";
+    system('sudo pacman -Rdd libpcap');
+    system('wget http://www.tcpdump.org/release/libpcap-1.4.0.tar.gz');
+    system('tar -xvf libpcap-1.4.0.tar.gz');
+    system('arch-pcap.sh');
+  }
 }
 else { die "Error: Don't know how to build for \"$dist\"\n"; }
 
