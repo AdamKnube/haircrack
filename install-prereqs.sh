@@ -54,17 +54,14 @@ elsif ($dist =~ /ARCH/) {
   $packages[12] = 'openssl';
   $packages[13] = 'libnl';
   $packages[14] = 'wget';  
+  my $getpacks = join(' ', @packages);
+  system($getpacks);
   if (`pacman -Ss libpcap` =~ /installed/) { 
-    print "Downgrading libpcap...\n";
+    print "Removing libpcap...\n";
     system('sudo pacman -Rdd libpcap');
   }
-  system('wget http://www.tcpdump.org/release/libpcap-1.4.0.tar.gz');
-  system('tar -xvf libpcap-1.4.0.tar.gz');
-  system('arch-pcap.sh');
-  }
+  print "Installing libpcap1.4.0...\n";
+  system('./arch-pcap.sh');
 }
 else { die "Error: Don't know how to build for \"$dist\"\n"; }
-
-my $getpacks = join(' ', @packages);
-system($getpacks);
 exit(0);

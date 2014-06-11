@@ -2,7 +2,9 @@
 #
 
 # Build script for libpcap on arch
-cd libpcap-1.4.0.tar.gz
+wget http://www.tcpdump.org/release/libpcap-1.4.0.tar.gz
+tar -xvf libpcap-1.4.0.tar.gz
+cd libpcap-1.4.0
 ./configure --prefix=/usr
 make
-make install
+sudo make install
