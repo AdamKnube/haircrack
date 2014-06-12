@@ -22,6 +22,7 @@ my $pman = '';
 my $pupc = '';
 my $pinc = '';
 my $prem = '';
+my $ddat = '';
 
 # Initialize
 GetOptions(
@@ -33,7 +34,7 @@ GetOptions(
 if ($reav || $airc || $pyrt) { $iall = 0; }
 my $dist = `uname -a`;
 if ($dist =~ /ubuntu/) {
-  dprint('Installing for Ubuntu Linux.', 1);
+  dprint('Installing for Ubuntu Linux.');
   $pfil = 'ubuntu.pre';
   $pman = 'apt-get';
   $pupc = 'update';
@@ -41,7 +42,7 @@ if ($dist =~ /ubuntu/) {
   $prem = 'purge libpcap libpcap-dev';
 }
 elsif ($dist =~ /ARCH/) {
-  dprint('Installing for Arch Linux.', 1);
+  dprint('Installing for Arch Linux.');
   $pfil = 'arch.pre';
   $pman = 'pacman';
   $pupc = '-Sy';
@@ -51,12 +52,13 @@ elsif ($dist =~ /ARCH/) {
 else { die "Error: Don't know how to build for \"$dist\"\n"; }
 
 # Update the system package lists
-dprint('Acquiring updated package lists..', 1);
-system("sudo $pman $pupc");
+dprint('Acquiring updated package lists..');
+$ddat = `sudo $pman $pupc 2>&1`;
+dprint($ddat, 1);
 
 # Get the required packages
 my @paklist;
-dprint('Reading package list...', 1);
+dprint('Reading package list...');
 open(PAKLIST, "<", $pfil) || die "Error: Can't find $pfil!\n";
 my @paks = <PAKLIST>;
 close(PAKLIST);
@@ -66,21 +68,35 @@ foreach my $pak (@paks) {
   $pak =~ s/\n//;
   if (($pak !~ /^#/) && ($pak ne '')) { push(@paklist, $pak); }
 }
-dprint('Acquiring packages...', 1);
-system("sudo $pman $pinc " . join(' ',@paklist));
+dprint('Acquiring packages...');
+my $joiner = "sudo $pman $pinc " . join(' ',@paklist) . ' 2>&1';
+$ddat = `$joiner`;
+dprint($ddat, 1);
 
 # Remove and downgrade libpcap if required
 if ($reav || $iall) { 
-  dprint('Removing libpcap...', 1);
-  system("sudo $pman $prem");
-  dprint('Installing libpcap1.4.0...', 1); 
-  system('./pcap.sh');
+  dprint('Removing libpcap...');
+  $ddat = `sudo $pman $prem`;
+  dprint($ddat, 1);
+  dprint('Installing libpcap1.4.0...'); 
+  $ddat = `./pcap.sh`;
+  dprint($ddat, 1);
 }
 
 # Install the requested/required tools
-if ($airc || $iall) { system ('./aircrack.sh'); }
-if ($reav || $iall) { system ('./reaver.sh'); }
-if ($pyrt || $iall) { system ('./pyrit.sh'); }
+dprint('Installing required/requested tools...')
+if ($airc || $iall) { 
+  $ddat = `./aircrack.sh`; 
+  dprint($ddat, 1);
+ }
+if ($reav || $iall) { 
+  $ddat = `./reaver.sh`;
+  dprint($ddat, 1);
+}
+if ($pyrt || $iall) {
+  $ddat = `./pyrit.sh`;
+  dprint($ddat, 1);
+}
 
 # Death by natural causes
 exit(0);
@@ -88,8 +104,8 @@ exit(0);
 # Functions/Subs
 sub dprint() {
   my $data = shift;
-  my $force = shift;
-  if ($debug || $force) { print "$data\n"; }
+  my $levl = shift;
+  if ($levl <= $debug) { print "$data\n"; }
   if ($debug > 1) {
 	my $trampstamp = `date +[%m/%d/%y-%H:%M:%S]`;
 	open(LOGG, ">>", "$0.log") || die "Can't open() the logfile\n";
