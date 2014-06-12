@@ -77,7 +77,7 @@ dprint($ddat, 1);
 # Remove and downgrade libpcap if required
 if ($reav || $iall) { 
   dprint('Removing libpcap...');
-  $ddat = `sudo $pman $prem`;
+  $ddat = `sudo $pman $prem 2>&1`;
   dprint($ddat, 1);
   dprint('Installing libpcap1.4.0...'); 
   $ddat = `./pcap.sh`;
