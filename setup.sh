@@ -84,11 +84,11 @@ if ($reav || $iall) {
 }
 
 # Install the requested/required tools
-dprint('Installing required/requested tools...')
+dprint('Installing required/requested tools...');
 if ($airc || $iall) { 
   $ddat = `./aircrack.sh`; 
   dprint($ddat, 1);
- }
+}
 if ($reav || $iall) { 
   $ddat = `./reaver.sh`;
   dprint($ddat, 1);
