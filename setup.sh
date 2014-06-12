@@ -21,13 +21,14 @@ my $pfil = '';
 my $pman = '';
 my $pupc = '';
 my $pinc = '';
+my $prem = '';
 
 # Initialize
 GetOptions(
   'debug+' => \$debug,
   'aircrack+' => \$airc,
-  'reaver+' => $reav,
-  'pyrit+' => pyrt,
+  'reaver+' => \$reav,
+  'pyrit+' => \$pyrt
 );
 if ($reav || $airc || $pyrt) { $iall = 0; }
 my $dist = `uname -a`;
@@ -90,7 +91,7 @@ sub dprint() {
   my $force = shift;
   if ($debug || $force) { print "$data\n"; }
   if ($debug > 1) {
-	my trampstamp = `date +[%m/%d/%y-%H:%M:%S]`;
+	my $trampstamp = `date +[%m/%d/%y-%H:%M:%S]`;
 	open(LOGG, ">>", "$0.log") || die "Can't open() the logfile\n";
 	print LOGG $trampstamp . " $data\n";
 	close(LOGG);
