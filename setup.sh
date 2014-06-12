@@ -38,7 +38,7 @@ if ($dist =~ /ubuntu/) {
   $pfil = 'ubuntu.pre';
   $pman = 'apt-get';
   $pupc = 'update';
-  $pinc = 'install';
+  $pinc = '--noconfirm install';
   $prem = 'purge libpcap libpcap-dev';
 }
 elsif ($dist =~ /ARCH/) {
@@ -46,7 +46,7 @@ elsif ($dist =~ /ARCH/) {
   $pfil = 'arch.pre';
   $pman = 'pacman';
   $pupc = '-Sy';
-  $pinc = '-S';
+  $pinc = '-S --needed';
   $prem = '-Rdd libpcap';
 }
 else { die "Error: Don't know how to build for \"$dist\"\n"; }
@@ -70,6 +70,7 @@ foreach my $pak (@paks) {
 }
 dprint('Acquiring packages...');
 my $joiner = "sudo $pman $pinc " . join(' ',@paklist) . ' 2>&1';
+if ($dist =~ /ARCH/) { $joiner = 'echo n | ' . $joiner; }
 $ddat = `$joiner`;
 dprint($ddat, 1);
 
@@ -105,7 +106,7 @@ exit(0);
 sub dprint() {
   my $data = shift;
   my $levl = shift;
-  if ($levl <= $debug) { print "$data\n"; }
+  if ($levl >= $debug) { print "$data\n"; }
   if ($debug > 1) {
 	my $trampstamp = `date +[%m/%d/%y-%H:%M:%S]`;
 	open(LOGG, ">>", "$0.log") || die "Can't open() the logfile\n";
