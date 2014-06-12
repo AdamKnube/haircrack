@@ -74,13 +74,13 @@ if ($reav || $iall) {
   dprint('Removing libpcap...', 1);
   system("sudo $pman $prem");
   dprint('Installing libpcap1.4.0...', 1); 
-  system('pcap.sh');
+  system('./pcap.sh');
 }
 
 # Install the requested/required tools
-if ($airc || $iall) { system ('aircrack.sh'); }
-if ($reav || $iall) { system ('reaver.sh'); }
-if ($pyrt || $iall) { system ('pyrit.sh'); }
+if ($airc || $iall) { system ('./aircrack.sh'); }
+if ($reav || $iall) { system ('./reaver.sh'); }
+if ($pyrt || $iall) { system ('./pyrit.sh'); }
 
 # Death by natural causes
 exit(0);
