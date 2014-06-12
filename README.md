@@ -18,9 +18,11 @@ History:
 
 Todo:
 ------
+  - Re-write the setup in python to properly catch the output.
   - Downgrade scripts for ubuntu.
   - Finish the hair.py.
-  - Maybe add some more distros to the installer (yum/yast/etc).
+  - Maybe add some more distros to the installer (yum/yast/wget-config-make/etc).
+
 
 Usage:
 ------------
