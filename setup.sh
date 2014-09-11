@@ -12,11 +12,17 @@ use strict;
 use Getopt::Long;
 
 # Globals
-my $reav = 0;
-my $airc = 0;
-my $pyrt = 0;
-my $iall = 1;
-my $debug = 0;
+my $reav = 0;	# install reaver
+my $airc = 0;	# install aircrack
+my $pyrt = 0;	# install pyrit
+my $iall = 1;	# install everything
+my $ccap = 0;	# install old libpcap (no longer needed)
+my $debug = 0;	# debug flag
+
+#
+#---------------------------------------------------------
+#
+
 my $pfil = '';
 my $pman = '';
 my $pupc = '';
@@ -75,7 +81,7 @@ $ddat = `$joiner`;
 dprint($ddat, 1);
 
 # Remove and downgrade libpcap if required
-if ($reav || $iall) { 
+if ($ccap) { 
   dprint('Removing libpcap...');
   $ddat = `sudo $pman $prem 2>&1`;
   dprint($ddat, 1);
