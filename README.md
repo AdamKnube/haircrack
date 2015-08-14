@@ -15,6 +15,7 @@ History:
   0.1 - Fixed aircrack SVN download link.
   0.2 - Changed the installer from bash to perl and added some portability.
   0.3a - libpcap seems broken these days so added scripts to downgrade it.
+  0.3b - libpcap is fixed, and also debian changed some package names
 
 Todo:
 ------

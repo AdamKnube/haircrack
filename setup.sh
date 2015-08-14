@@ -39,12 +39,13 @@ GetOptions(
 );
 if ($reav || $airc || $pyrt) { $iall = 0; }
 my $dist = `uname -a`;
+if ($dist =~ /kali/) { $dist = 'ubuntu'; }
 if ($dist =~ /ubuntu/) {
   dprint('Installing for Ubuntu Linux.');
   $pfil = 'ubuntu.pre';
   $pman = 'apt-get';
   $pupc = 'update';
-  $pinc = '--noconfirm install';
+  $pinc = '-y install';
   $prem = 'purge libpcap libpcap-dev';
 }
 elsif ($dist =~ /ARCH/) {
