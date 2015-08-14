@@ -29,3 +29,5 @@ tcl8.5
 libpcap0.8 
 libpcap0.8-dev 
 cracklib-runtime
+pkg-config
+
