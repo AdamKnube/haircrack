@@ -39,10 +39,17 @@ GetOptions(
 );
 if ($reav || $airc || $pyrt) { $iall = 0; }
 my $dist = `uname -a`;
-if ($dist =~ /kali/) { $dist = 'ubuntu'; }
 if ($dist =~ /ubuntu/) {
   dprint('Installing for Ubuntu Linux.');
   $pfil = 'ubuntu.pre';
+  $pman = 'apt-get';
+  $pupc = 'update';
+  $pinc = '-y install';
+  $prem = 'purge libpcap libpcap-dev';
+}
+if ($dist =~ /kali/) {
+  dprint('Installing for Kali Linux.');
+  $pfil = 'kali.pre';
   $pman = 'apt-get';
   $pupc = 'update';
   $pinc = '-y install';
@@ -70,7 +77,7 @@ open(PAKLIST, "<", $pfil) || die "Error: Can't find $pfil!\n";
 my @paks = <PAKLIST>;
 close(PAKLIST);
 foreach my $pak (@paks) {
-  $pak =~ s/^\s+//;
+  $pak =~ s/^\s+prem//;
   $pak =~ s/\s+$//; 
   $pak =~ s/\n//;
   if (($pak !~ /^#/) && ($pak ne '')) { push(@paklist, $pak); }
