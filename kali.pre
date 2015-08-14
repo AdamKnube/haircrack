@@ -8,7 +8,6 @@ autoconf
 bison
 gawk
 python-scapy
-python3-scapy
 libsqlite0-dev
 libsqlite3-dev
 cmake
