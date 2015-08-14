@@ -30,4 +30,5 @@ libpcap0.8
 libpcap0.8-dev 
 cracklib-runtime
 pkg-config
-
+ocl-icd-libopencl1
+opencl-icd
