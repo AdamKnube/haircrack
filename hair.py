@@ -38,15 +38,15 @@ WASH_ESSID = 5
 WASH_CHANNEL = 1
 WASH_LOCKED = 4
 WASH_POWER = 2
-AIRCRACK = '/usr/local/bin/aircrack-ng'
-AIREPLAY = '/usr/local/sbin/aireplay-ng'
-AIRODUMP = '/usr/local/sbin/airodump-ng'
-WASH = '/usr/local/bin/wash'
-REAVER = '/usr/local/bin/reaver'
-IFCONFIG = '/sbin/ifconfig'
-IWCONFIG = '/sbin/iwconfig'
-DATE = '/bin/date'
-KILLALL = '/usr/bin/killall'
+AIRCRACK = '/usr/bin/aircrack-ng'
+AIREPLAY = '/usr/bin/aireplay-ng'
+AIRODUMP = '/usr/bin/airodump-ng'
+WASH = '/usr/bin/wash'
+REAVER = '/usr/bin/reaver'
+IFCONFIG = '/usr/bin/ifconfig'
+IWCONFIG = '/usr/bin/iwconfig'
+DATE = '/usr//bin/date'
+KILLALL = '/usr/bin/killall -w'
 
 # Debug printer
 def dprint(data='', iforce=0):
@@ -141,7 +141,6 @@ def runmain():
 	system(IFCONFIG + ' ' + iface + ' down')
 	system(IWCONFIG + ' ' + iface + ' mode monitor')
 	system(IFCONFIG + ' ' + iface + ' up')
-	
 	dprint('Scanning for ' + repr(scantime + washtime) + ' seconds...', 1)
 	
 	# Scan airodump-ng
@@ -240,7 +239,7 @@ def runmain():
 			if (avector == mode):
 				atkmode = avector
 		if (atkmode == ''): 
-			drpint('Invalid attack vector chosen: ' + avector, 1)	
+			dprint('Invalid attack vector chosen: ' + avector, 1)	
 	dprint('Selected attack vector: ' + atkmode)
 	if (atkmode == 'wps'):
 		who2reav = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
@@ -266,7 +265,7 @@ def runmain():
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
 		return 1
 	else:
-		who2dcrak = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
+		who2crak = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
 		for ap in aptable:
 			if (ap[colnames[DUMP_ESSID]] == who2crak):
 				dprint('Not Implemented yet sorry', 1)
