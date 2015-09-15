@@ -41,11 +41,11 @@ WASH_POWER = 2
 AIRCRACK = '/usr/bin/aircrack-ng'
 AIREPLAY = '/usr/bin/aireplay-ng'
 AIRODUMP = '/usr/bin/airodump-ng'
-WASH = '/usr/bin/wash'
+WASH = '/usr/bin/wash -C'
 REAVER = '/usr/bin/reaver'
 IFCONFIG = '/usr/bin/ifconfig'
 IWCONFIG = '/usr/bin/iwconfig'
-DATE = '/usr//bin/date'
+DATE = '/usr/bin/date'
 KILLALL = '/usr/bin/killall -w'
 
 # Debug printer
