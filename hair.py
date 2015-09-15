@@ -29,9 +29,9 @@ iface = 'wlan0'
 
 # Statics
 DUMP_BSSID = 0
-DUMP_ESSID = 14
+DUMP_ESSID = 13
 DUMP_CHANNEL = 3
-DUMP_PRIVACY = 6
+DUMP_PRIVACY = 5
 DUMP_POWER = 8
 WASH_BSSID = 0
 WASH_ESSID = 5
@@ -98,7 +98,7 @@ def showtable(thekeys, thetable):
 			if (wkey == 'BSSID'):
 				padamt = len(ap[wkey]) + 2
 			elif (wkey == 'ESSID'):
-				padamt = 12
+				padamt = 13
 			elif (wkey.lower() == 'channel'):
 				padamt = 3
 			pstr += wkey + ': ' + pad(ap[wkey], padamt)  + ' '
